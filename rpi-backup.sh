@@ -1,5 +1,5 @@
 #!/bin/bash
-USAGE="Usage: ./rpi-backup.sh -b BOOTDIR -r ROOTDIR [-n NAME] DESTINATION"
+USAGE="Usage: ./rpi-backup.sh [-b BOOTDIR] [-r ROOTDIR] [-h HOMEDIR] [-n NAME] DESTINATION"
 OPTIND=1
 
 bootdir=""
@@ -8,8 +8,8 @@ dest=""
 verbose=""
 name="rpi"
 
-SHORT=b:r:n:v
-LONG=boot:root:name:verbose
+SHORT=b:r:h:n:v
+LONG=boot:root:home:name:verbose
 OPTS=$(getopt -o $SHORT --long $LONG --name "$0" -- "$@")
 
 eval set -- "$OPTS"
@@ -22,6 +22,10 @@ while [[ $# -gt 0 ]] ; do
         ;;
         -b|--boot)
             bootdir="$2"
+            shift 2
+        ;;
+        -h|--home)
+            homedir="$2"
             shift 2
         ;;
         -n|--name)
@@ -47,8 +51,13 @@ while [[ $# -gt 0 ]] ; do
         ;;
     esac
 done
-echo $dest
+
 date=$(date -I)
+if [[ ! $dest == */ ]] ; then
+    dest="$dest/"
+fi
+
+mkdir "$dest"
 
 if [[ -z $dest ]] ; then
     >&2 echo "ERROR A destination must be provided"
@@ -62,7 +71,13 @@ fi
 if [[ ! -z $rootdir ]] ; then
     echo tar czpf "${dest}${name}-${date}-root.tar.gz ${verbose} --xattrs --one-file-system -C ${rootdir} ."
     tar czpf "${dest}${name}-${date}-root.tar.gz" ${verbose} --xattrs --one-file-system -C "${rootdir}" "."
-elif [[ -z $bootdir ]] ; then
+fi
+if [[ ! -z $homedir ]] ; then
+    echo tar czpf "${dest}${name}-${date}-home.tar.gz ${verbose} --xattrs --one-file-system -C ${homedir} ."
+    tar czpf "${dest}${name}-${date}-home.tar.gz" ${verbose} --xattrs --one-file-system -C "${homedir}" "."
+fi
+if [[ -z "$bootdir$rootdir$homedir" ]] ; then
+    echo "ERROR Specify at least one partition to backup\n"
     echo "$USAGE"
     exit 14
 fi
