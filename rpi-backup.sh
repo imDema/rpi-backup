@@ -57,13 +57,14 @@ if [[ ! $dest == */ ]] ; then
     dest="$dest/"
 fi
 
-mkdir "$dest"
-
 if [[ -z $dest ]] ; then
     >&2 echo "ERROR A destination must be provided"
     echo "$USAGE"
     exit 1
 fi
+
+mkdir "$dest"
+
 if [[ ! -z $bootdir ]] ; then
     echo tar czf "${dest}${name}-${date}-boot.tar.gz ${verbose} --one-file-system -C ${bootdir} ."
     tar czf "${dest}${name}-${date}-boot.tar.gz" ${verbose} --one-file-system -C "${bootdir}" "."
