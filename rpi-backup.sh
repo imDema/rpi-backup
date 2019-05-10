@@ -53,9 +53,6 @@ while [[ $# -gt 0 ]] ; do
 done
 
 date=$(date -I)
-if [[ ! $dest == */ ]] ; then
-    dest="$dest/"
-fi
 
 if [[ -z $dest ]] ; then
     >&2 echo "ERROR A destination must be provided"
@@ -63,6 +60,9 @@ if [[ -z $dest ]] ; then
     exit 1
 fi
 
+if [[ ! $dest == */ ]] ; then
+    dest="$dest/"
+fi
 mkdir "$dest"
 
 if [[ ! -z $bootdir ]] ; then
